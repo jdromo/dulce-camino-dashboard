@@ -9,34 +9,94 @@
     body { font-family: sans-serif; background: #fff9f3; color: #333; padding: 2rem; }
     .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:1.5rem; margin-bottom:2rem; }
     .card { background:white; border-radius:1rem; padding:1rem; box-shadow:0 2px 5px rgba(0,0,0,.1); text-align:center; }
-    canvas { max-width:100%; }
+    canvas { max-width:100%; margin-bottom: 2rem; }
     table { width:100%; border-collapse: collapse; margin-top:2rem; }
     th, td { border:1px solid #ccc; padding:0.5rem; text-align:left; }
     th { background:#f7f0e6; }
+    select { margin-bottom: 1rem; padding: 0.5rem; font-size: 1rem; }
   </style>
 </head>
 <body>
   <h1>📊 Dashboard Dulce Camino</h1>
 
+  <label for="daySelector"><strong>Selecciona un día:</strong></label>
+  <select id="daySelector"></select>
+
   <div class="dashboard">
-    <div class="card"><h3>Piezas Producidas</h3><p id="pieces">100</p></div>
-    <div class="card"><h3>Ingreso del Día</h3><p id="income">$700</p></div>
-    <div class="card"><h3>Costo de Materia Prima</h3><p id="cost">$422</p></div>
-    <div class="card"><h3>Ganancia</h3><p id="profit">$278</p></div>
+    <div class="card"><h3>Piezas Producidas</h3><p id="pieces"></p></div>
+    <div class="card"><h3>Piezas Vendidas</h3><p id="sold"></p></div>
+    <div class="card"><h3>Ingreso del Día</h3><p id="income"></p></div>
+    <div class="card"><h3>Costo de Materia Prima</h3><p id="cost"></p></div>
+    <div class="card"><h3>Ganancia</h3><p id="profit"></p></div>
   </div>
 
-  <canvas id="trendChart" height="120"></canvas>
+  <canvas id="financialChart" height="120"></canvas>
+  <canvas id="productionChart" height="120"></canvas>
 
   <script>
-    const ctx = document.getElementById('trendChart').getContext('2d');
-    new Chart(ctx, {
+    const data = Array.from({ length: 10 }, (_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - (9 - i));
+      const dateStr = date.toISOString().split('T')[0];
+      const pieces = Math.floor(Math.random() * (160 - 100 + 1)) + 100;
+      const sold = (i === 2 || i === 6) ? pieces - 20 : pieces;
+      const costPerPiece = 4.22;
+      const pricePerPiece = 7;
+      const cost = +(pieces * costPerPiece).toFixed(2);
+      const income = +(sold * pricePerPiece).toFixed(2);
+      const profit = +(income - cost).toFixed(2);
+      return { date: dateStr, pieces, sold, cost, income, profit };
+    });
+
+    const daySelector = document.getElementById("daySelector");
+    data.forEach((entry, index) => {
+      const option = document.createElement("option");
+      option.value = index;
+      option.text = entry.date;
+      daySelector.appendChild(option);
+    });
+
+    function updateCards(index) {
+      const entry = data[index];
+      document.getElementById("pieces").innerText = entry.pieces;
+      document.getElementById("sold").innerText = entry.sold;
+      document.getElementById("income").innerText = `$${entry.income}`;
+      document.getElementById("cost").innerText = `$${entry.cost}`;
+      document.getElementById("profit").innerText = `$${entry.profit}`;
+    }
+
+    daySelector.addEventListener("change", (e) => {
+      updateCards(e.target.value);
+    });
+
+    updateCards(data.length - 1);
+    daySelector.value = data.length - 1;
+
+    const financialCtx = document.getElementById('financialChart').getContext('2d');
+    new Chart(financialCtx, {
       type: 'line',
       data: {
-        labels: ['Hoy','Ayer'],
+        labels: data.map(d => d.date),
         datasets: [
-          { label: 'Ingreso', data: [700,700], borderColor:'#4CAF50', fill:false },
-          { label: 'Costo MP', data: [422,422], borderColor:'#FF9800', fill:false },
-          { label: 'Ganancia', data: [278,278], borderColor:'#2196F3', fill:false },
+          { label: 'Ingreso', data: data.map(d => d.income), borderColor:'#4CAF50', fill:false },
+          { label: 'Costo MP', data: data.map(d => d.cost), borderColor:'#FF9800', fill:false },
+          { label: 'Ganancia', data: data.map(d => d.profit), borderColor:'#2196F3', fill:false },
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom' } }
+      }
+    });
+
+    const productionCtx = document.getElementById('productionChart').getContext('2d');
+    new Chart(productionCtx, {
+      type: 'line',
+      data: {
+        labels: data.map(d => d.date),
+        datasets: [
+          { label: 'Piezas Producidas', data: data.map(d => d.pieces), borderColor:'#607D8B', fill:false },
+          { label: 'Piezas Vendidas', data: data.map(d => d.sold), borderColor:'#9C27B0', fill:false },
         ]
       },
       options: {
