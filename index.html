@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dulce Camino Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #fff9f3;
+      color: #333;
+      padding: 2rem;
+    }
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .card {
+      background: white;
+      border-radius: 1rem;
+      padding: 1rem;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+    canvas {
+      max-width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <h1>📊 Dulce Camino Dashboard</h1>
+
+  <div class="dashboard">
+    <div class="card">
+      <h3>Today's Income</h3>
+      <p id="income">$1,800</p>
+    </div>
+    <div class="card">
+      <h3>Raw Material Cost</h3>
+      <p id="cost">$480</p>
+    </div>
+    <div class="card">
+      <h3>Pieces Produced</h3>
+      <p id="pieces">120</p>
+    </div>
+    <div class="card">
+      <h3>Profit</h3>
+      <p id="profit">$1,320</p>
+    </div>
+  </div>
+
+  <canvas id="trendChart" height="120"></canvas>
+
+  <script>
+    const ctx = document.getElementById('trendChart').getContext('2d');
+    const trendChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['2025-06-06', '2025-06-07', '2025-06-08', '2025-06-09'],
+        datasets: [
+          {
+            label: 'Total Income',
+            data: [1800, 2250, 1650, 2100],
+            borderColor: '#4CAF50',
+            fill: false,
+          },
+          {
+            label: 'Raw Material Cost',
+            data: [480, 520, 500, 550],
+            borderColor: '#FF9800',
+            fill: false,
+          },
+          {
+            label: 'Profit',
+            data: [1320, 1730, 1150, 1550],
+            borderColor: '#2196F3',
+            fill: false,
+          },
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'bottom'
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
